@@ -28,6 +28,12 @@
             <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
         {% endif %}
+
+        {% if sended %}
+            <div class="alert alert-success"><i class="fa fa-check-circle"></i> <span>{{ text_sended }} <?php echo $success; ?></span>
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
         <div class="form-group">
             <div class="col-sm-10">
                 <input type="text" name="filter_code" value="{{ filter_code }}" placeholder="{{ entry_code_coupon }}" id="input-customer" class="form-control" />

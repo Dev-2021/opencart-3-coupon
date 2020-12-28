@@ -49,8 +49,10 @@ class ControllerExtensionModuleCouponNik extends Controller {
                             'code'  => $coupon_template['code']
                         );
                         $this->sendCoupon($send_info);
+                        $this->session->data['sended'] = $this->language->get('text_sended');
                     }
                 }
+
             } else {
                 for($i = 0; $i < $coupon_template['coupon_count']; $i++) {
                     $coupon_template['name'] = 'Купон №' . ($i + 1);
@@ -253,6 +255,14 @@ class ControllerExtensionModuleCouponNik extends Controller {
             unset($this->session->data['success']);
         } else {
             $data['success'] = '';
+        }
+
+        if (isset($this->session->data['sended'])) {
+            $data['sended'] = $this->session->data['sended'];
+
+            unset($this->session->data['sended']);
+        } else {
+            $data['sended'] = '';
         }
 
         if (isset($this->request->post['selected'])) {
@@ -501,11 +511,9 @@ class ControllerExtensionModuleCouponNik extends Controller {
     }
 
     public function install() {
-        if ($this->user->hasPermission('modify', 'extension/module/coupon_nik')) {
-            $this->load->model('extension/module/coupon_nik');
+        $this->load->model('extension/module/coupon_nik');
 
-            $this->model_extension_module_coupon_nik->install();
-        }
+        $this->model_extension_module_coupon_nik->install();
     }
 
     public function uninstall() {
