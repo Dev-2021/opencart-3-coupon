@@ -32,7 +32,24 @@ class ControllerExtensionModuleCouponNik extends Controller {
                     $coupon_template['name'] = 'Купон для ' . $customer['lastname'] . ' ' . $customer['firstname'];
                     $coupon_template['code'] = $this->generateCode();
 
-                    $this->model_marketing_coupon->addCoupon($coupon_template);
+                    $coupon_id = $this->model_marketing_coupon->addCoupon($coupon_template);
+                    // save to our db
+                    $data = array(
+                        'coupon_id'   => $coupon_id,
+                        'coupon_code' => $coupon_template['code'],
+                        'customer_id' => $customer['customer_id']
+                    );
+                    $this->model_extension_module_coupon_nik->add($data);
+
+                    if($coupon_template['send']) {
+                        // send to customers
+                        $send_info = array(
+                            'email' => $customer['email'],
+                            'name'  => $customer['lastname'] . ' ' . $customer['firstname'],
+                            'code'  => $coupon_template['code']
+                        );
+                        $this->sendCoupon($send_info);
+                    }
                 }
             } else {
                 for($i = 0; $i < $coupon_template['coupon_count']; $i++) {
@@ -59,9 +76,10 @@ class ControllerExtensionModuleCouponNik extends Controller {
         $this->document->setTitle($this->language->get('heading_title'));
 
         $this->load->model('extension/module/coupon_nik');
+        $this->load->model('marketing/coupon');
 
-		if (isset($this->request->get['coupon_id']) && $this->validateDelete()) {
-			$this->model_extension_module_mailing->delete($this->request->get['coupon_id']);
+		if (isset($this->request->get['coupon_id']) && $this->validatePermission()) {
+			$this->model_marketing_coupon->deleteCoupon($this->request->get['coupon_id']);
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -78,9 +96,10 @@ class ControllerExtensionModuleCouponNik extends Controller {
 			$this->response->redirect($this->url->link('extension/module/coupon_nik', 'user_token=' . $this->session->data['user_token'] . $url, true));
 		}
 
-        if (isset($this->request->post['selected']) && $this->validateDelete()) {
-            foreach ($this->request->post['selected'] as $mailing_id) {
-                $this->model_extension_module_mailing->delete($mailing_id);
+        if (isset($this->request->post['selected']) && $this->validatePermission()) {
+            foreach ($this->request->post['selected'] as $coupon_id) {
+                $this->model_marketing_coupon->deleteCoupon($coupon_id);
+                $this->model_extension_module_coupon_nik->delete($coupon_id);
             }
 
             $this->session->data['success'] = $this->language->get('text_success');
@@ -101,7 +120,49 @@ class ControllerExtensionModuleCouponNik extends Controller {
 		$this->getList();
 	}
 
+    public function repair() {
+        $this->load->language('extension/module/coupon_nik');
+
+        $this->document->setTitle($this->language->get('heading_title'));
+
+        $this->load->model('extension/module/coupon_nik');
+
+        if ($this->validatePermission()) {
+            $this->model_extension_module_coupon_nik->repairRelations();
+
+            $this->session->data['success'] = $this->language->get('text_success');
+
+            $url = '';
+
+            if (isset($this->request->get['sort'])) {
+                $url .= '&sort=' . $this->request->get['sort'];
+            }
+
+            if (isset($this->request->get['order'])) {
+                $url .= '&order=' . $this->request->get['order'];
+            }
+
+            if (isset($this->request->get['page'])) {
+                $url .= '&page=' . $this->request->get['page'];
+            }
+
+            if (isset($this->request->get['filter_name'])) {
+                $url .= '&filter_name=' . $this->request->get['filter_name'];
+            }
+
+            $this->response->redirect($this->url->link('extension/module/coupon_nik', 'user_token=' . $this->session->data['user_token'] . $url, true));
+        }
+
+        $this->getList();
+    }
+
     protected function getList() {
+        if (isset($this->request->get['filter_code'])) {
+            $filter_code = $this->request->get['filter_code'];
+        } else {
+            $filter_code = '';
+        }
+
         if (isset($this->request->get['sort'])) {
             $sort = $this->request->get['sort'];
         } else {
@@ -122,6 +183,10 @@ class ControllerExtensionModuleCouponNik extends Controller {
 
         $url = '';
 
+        if (isset($this->request->get['filter_code'])) {
+            $url .= '&filter_code=' . urlencode(html_entity_decode($this->request->get['filter_code'], ENT_QUOTES, 'UTF-8'));
+        }
+
         if (isset($this->request->get['order'])) {
             $url .= '&order=' . $this->request->get['order'];
         }
@@ -139,21 +204,29 @@ class ControllerExtensionModuleCouponNik extends Controller {
         );
 
         $data['add'] = $this->url->link('extension/module/coupon_nik/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
+        $data['repair'] = $this->url->link('extension/module/coupon_nik/repair', 'user_token=' . $this->session->data['user_token'] . $url, true);
         $data['delete'] = $this->url->link('extension/module/coupon_nik/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
         $data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
         $data['coupons'] = array();
 
         $filter_data = array(
+            'filter_code' => $filter_code,
             'sort'  => $sort,
             'order' => $order,
             'start' => ($page - 1) * $this->config->get('config_limit_admin'),
             'limit' => $this->config->get('config_limit_admin')
         );
 
-        $coupon_total = $this->model_marketing_coupon->getTotalCoupons();
+        if(!$filter_code) {
+            $coupon_total = $this->model_marketing_coupon->getTotalCoupons();
 
-        $results = $this->model_marketing_coupon->getCoupons($filter_data);
+            $results = $this->model_marketing_coupon->getCoupons($filter_data);
+        } else {
+            $results = $this->model_extension_module_coupon_nik->getCoupons($filter_data);
+
+            $coupon_total = count($results);
+        }
 
         foreach ($results as $result) {
             $data['coupons'][] = array(
@@ -227,6 +300,8 @@ class ControllerExtensionModuleCouponNik extends Controller {
 
         $data['results'] = sprintf($this->language->get('text_pagination'), ($coupon_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($coupon_total - $this->config->get('config_limit_admin'))) ? $coupon_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $coupon_total, ceil($coupon_total / $this->config->get('config_limit_admin')));
 
+        $data['filter_code'] = $filter_code;
+
         $data['sort'] = $sort;
         $data['order'] = $order;
 
@@ -256,16 +331,10 @@ class ControllerExtensionModuleCouponNik extends Controller {
             $data['error_warning'] = '';
         }
 
-        if (isset($this->error['name'])) {
-            $data['error_name'] = $this->error['name'];
+        if (isset($this->error['coupon_data'])) {
+            $data['error_coupon_data'] = $this->error['coupon_data'];
         } else {
-            $data['error_name'] = '';
-        }
-
-        if (isset($this->error['code'])) {
-            $data['error_code'] = $this->error['code'];
-        } else {
-            $data['error_code'] = '';
+            $data['error_coupon_data'] = '';
         }
 
         if (isset($this->error['date_start'])) {
@@ -412,11 +481,30 @@ class ControllerExtensionModuleCouponNik extends Controller {
         return !empty($coupon_info);
     }
 
+    private function sendCoupon($data) {
+        $from = $this->config->get('config_email');
+
+        $mail = new Mail($this->config->get('config_mail_engine'));
+        $mail->parameter = $this->config->get('config_mail_parameter');
+        $mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
+        $mail->smtp_username = $this->config->get('config_mail_smtp_username');
+        $mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
+        $mail->smtp_port = $this->config->get('config_mail_smtp_port');
+        $mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
+
+        $mail->setTo($data['email']);
+        $mail->setFrom($from);
+        $mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
+        $mail->setSubject(html_entity_decode(sprintf('Вы получили новый купон!'), ENT_QUOTES, 'UTF-8'));
+        $mail->setHtml($this->load->view('mail/coupon_alert', $data));
+        $mail->send();
+    }
+
     public function install() {
         if ($this->user->hasPermission('modify', 'extension/module/coupon_nik')) {
             $this->load->model('extension/module/coupon_nik');
 
-            $this->model_extension_module_mailing->install();
+            $this->model_extension_module_coupon_nik->install();
         }
     }
 
@@ -424,7 +512,7 @@ class ControllerExtensionModuleCouponNik extends Controller {
         if ($this->user->hasPermission('modify', 'extension/module/coupon_nik')) {
             $this->load->model('extension/module/coupon_nik');
 
-            $this->model_extension_module_mailing->uninstall();
+            $this->model_extension_module_coupon_nik->uninstall();
         }
     }
 
@@ -445,7 +533,7 @@ class ControllerExtensionModuleCouponNik extends Controller {
         }
     }
 
-    protected function validateDelete() {
+    protected function validatePermission() {
         if (!$this->user->hasPermission('modify', 'extension/module/coupon_nik')) {
             $this->error['warning'] = $this->language->get('error_permission');
         }
@@ -460,6 +548,10 @@ class ControllerExtensionModuleCouponNik extends Controller {
 
         if ($this->error && !isset($this->error['warning'])) {
             $this->error['warning'] = $this->language->get('error_warning');
+        }
+
+        if (!$this->request->post['coupon_count'] && !isset($this->request->post['coupon_customer'])) {
+            $this->error['coupon_data'] = $this->language->get('error_coupon_data');
         }
 
         return !$this->error;

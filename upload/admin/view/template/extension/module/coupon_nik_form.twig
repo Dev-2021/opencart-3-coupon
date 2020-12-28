@@ -21,6 +21,12 @@
         </div>
         {% endif %}
 
+        {% if error_coupon_data %}
+            <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_coupon_data }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
+
         {% if success %}
         <div class="alert alert-success"><i class="fa fa-check-circle"></i> <?php echo $success; ?>
             <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -37,18 +43,6 @@
                     </ul>
                     <div class="tab-content">
                         <div class="tab-pane active" id="tab-general">
-                            <div class="form-group required">
-                                <label class="col-sm-2 control-label" for="input-name">{{ entry_name }}</label>
-                                <div class="col-sm-10">
-                                    <input type="text" name="name" disabled value="{{ name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
-                                </div>
-                            </div>
-                            <div class="form-group required">
-                                <label class="col-sm-2 control-label" for="input-code"><span data-toggle="tooltip" title="{{ help_code }}">{{ entry_code }}</span></label>
-                                <div class="col-sm-10">
-                                    <input type="text" name="code" disabled value="{{ code }}" placeholder="{{ entry_code }}" id="input-code" class="form-control" />
-                                </div>
-                            </div>
                             <div class="form-group">
                                 <label class="col-sm-2 control-label" for="input-coupon-count"><span data-toggle="tooltip" title="{{ help_coupon_count }}">{{ entry_coupon_count }}</span></label>
                                 <div class="col-sm-10">
