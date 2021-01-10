@@ -12,11 +12,13 @@ $_['text_edit']           = 'Редактирование';
 $_['text_percent']        = 'Процент';
 $_['text_amount']         = 'Фиксированная сумма';
 $_['text_coupon']         = 'История купонов';
+$_['text_with_link']      = 'По ссылке';
 
 // Entry
 $_['entry_name']          = 'Название Купона';
 $_['entry_code']          = 'Код';
 $_['entry_coupon_count']  = 'Кол-во купонов';
+$_['entry_coupon_recive_method'] = 'Способ получения купона';
 $_['entry_send']          = 'Отправить купоны клиентам';
 $_['entry_customer']      = 'Клиенты';
 $_['entry_type']          = 'Тип';

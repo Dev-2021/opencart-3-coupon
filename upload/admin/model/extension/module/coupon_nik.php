@@ -7,6 +7,7 @@ class ModelExtensionModuleCouponNik extends Model {
 			`coupon_id` INT(11) NOT NULL,
 			`coupon_code` varchar(50) NOT NULL,
 			`customer_id` INT(11) NOT NULL,
+			`coupon_link` varchar(255) NOT NULL,
 			PRIMARY KEY (`id`)
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci");
     }
@@ -18,7 +19,7 @@ class ModelExtensionModuleCouponNik extends Model {
     }
 
     public function add($data) {
-        $this->db->query("INSERT INTO " . DB_PREFIX . "customer_coupon SET `coupon_id` = '" . (int)$data['coupon_id'] . "', coupon_code = '" . $this->db->escape($data['coupon_code']) . "', customer_id = '" . (int)$data['customer_id'] . "'");
+        $this->db->query("INSERT INTO " . DB_PREFIX . "customer_coupon SET `coupon_id` = '" . (int)$data['coupon_id'] . "', coupon_code = '" . $this->db->escape($data['coupon_code']) . "', customer_id = '" . (int)$data['customer_id'] . "', coupon_link = '" . $this->db->escape($data['coupon_link']) . "'");
 
         return $this->db->getLastId();
     }

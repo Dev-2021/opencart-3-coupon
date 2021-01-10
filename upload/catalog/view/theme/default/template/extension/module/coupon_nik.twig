@@ -1,0 +1,54 @@
+{{ header }}
+<div id="coupon-nik" class="container">
+ <ul class="breadcrumb">
+  {% for breadcrumb in breadcrumbs %}
+   <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+  {% endfor %}
+ </ul>
+ <div class="row">{{ column_left }}
+  {% if column_left and column_right %}
+   {% set class = 'col-sm-6' %}
+  {% elseif column_left or column_right %}
+   {% set class = 'col-sm-9' %}
+  {% else %}
+   {% set class = 'col-sm-12' %}
+  {% endif %}
+  <div id="content" class="{{ class }}">{{ content_top }}
+   <h2>{{ heading_title }}</h2>
+   <div class="row">
+    {% if column_left or column_right %}
+     {% set class = 'col-sm-6' %}
+    {% else %}
+     {% set class = 'col-sm-8' %}
+    {% endif %}
+
+    <h4>{{ can_use_message }}</h4>
+
+    {% if can_use %}
+    <button onclick="event.preventDefault();getCoupon()" data-toggle="tooltip" class="btn btn-primary">Получить</button>
+    {% endif %}
+
+    <h3 id="responseMessage"></h3>
+   </div>
+   <script type="text/javascript">
+
+    function getCoupon() {
+        $.ajax({
+            url: 'index.php?route=extension/module/coupon_nik/getCoupon',
+            success: function(res) {
+                if(res) {
+                    $('#responseMessage').text('Купон успешно получен')
+                    setTimeout('window.history.back()',5000);
+                }
+            }
+        });
+    }
+
+   </script>
+
+    {{ content_bottom }}
+    </div>
+      {{ column_right }}
+    </div>
+</div>
+{{ footer }}

@@ -58,7 +58,18 @@ class ControllerExtensionModuleCouponNik extends Controller {
                     $coupon_template['name'] = 'Купон №' . ($i + 1);
                     $coupon_template['code'] = $this->generateCode();
 
-                    $this->model_marketing_coupon->addCoupon($coupon_template);
+                    $coupon_id = $this->model_marketing_coupon->addCoupon($coupon_template);
+
+                    if(isset($coupon_template['coupon_link'])) {
+                        $data = array(
+                            'coupon_id'   => $coupon_id,
+                            'coupon_code' => $coupon_template['code'],
+                            'customer_id' => 0,
+                            'coupon_link' => $coupon_template['coupon_link'] . '&code=' . $coupon_template['code']
+                        );
+                        $this->model_extension_module_coupon_nik->add($data);
+                    }
+
                 }
             }
 
