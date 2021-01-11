@@ -76,7 +76,7 @@ class ModelExtensionModuleCouponNik extends Model {
     }
 
     public function getCouponUsedCountByCustomer($coupon_id, $customer_id) {
-        $sql = "SELECT COUNT(`coupon_id`) as q FROM " . DB_PREFIX . "customer_coupon WHERE `coupon_id` = '" . (int)$coupon_id . "' AND `customer_id` = '" . (int)$customer_id . "'";
+        $sql = "SELECT COUNT(`coupon_id`) as q FROM " . DB_PREFIX . "coupon_history WHERE `coupon_id` = '" . (int)$coupon_id . "' AND `customer_id` = '" . (int)$customer_id . "'";
 
         $query = $this->db->query($sql);
 
