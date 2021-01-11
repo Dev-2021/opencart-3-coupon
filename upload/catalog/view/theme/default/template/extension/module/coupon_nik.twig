@@ -22,23 +22,31 @@
      {% set class = 'col-sm-8' %}
     {% endif %}
 
-    <h4>{{ can_use_message }}</h4>
+     <div class="col-sm-12">
+        <h4>{{ can_use_message }}</h4>
 
-    {% if can_use %}
-    <button onclick="event.preventDefault();getCoupon()" data-toggle="tooltip" class="btn btn-primary">Получить</button>
-    {% endif %}
+        {% if can_use %}
+        <button id="get-coupon" onclick="event.preventDefault();getCoupon()" data-toggle="tooltip" class="btn btn-primary">Получить</button>
+        {% endif %}
 
-    <h3 id="responseMessage"></h3>
+        <h3 id="responseMessage"></h3>
+     </div>
+   </div>
    </div>
    <script type="text/javascript">
 
     function getCoupon() {
         $.ajax({
-            url: 'index.php?route=extension/module/coupon_nik/getCoupon',
+            url: 'index.php?route=extension/module/coupon_nik/getCoupon&code={{ coupon_code }}',
             success: function(res) {
+                let text = 'Купон {{ coupon_name }} на скидку {{ coupon_discount }}' + ('{{ coupon_type }}' === 'P' ? '%' : 'руб.') + ' успешно получен. Его код - {{ coupon_code }}. '
+                $('#get-coupon').hide();
+                $('#responseMessage').text(text)
+                console.log(res)
                 if(res) {
-                    $('#responseMessage').text('Купон успешно получен')
                     setTimeout('window.history.back()',5000);
+                } else {
+                    $('#responseMessage').append('Не забудьте сохранить его и использовать при покупке!');
                 }
             }
         });

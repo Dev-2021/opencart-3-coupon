@@ -37,7 +37,8 @@ class ControllerExtensionModuleCouponNik extends Controller {
                     $data = array(
                         'coupon_id'   => $coupon_id,
                         'coupon_code' => $coupon_template['code'],
-                        'customer_id' => $customer['customer_id']
+                        'customer_id' => $customer['customer_id'],
+                        'coupon_link' => ''
                     );
                     $this->model_extension_module_coupon_nik->add($data);
 

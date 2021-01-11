@@ -18,9 +18,10 @@ class ControllerExtensionModuleCouponNik extends Controller {
 
         $this->load->model('extension/module/coupon_nik');
 
+        $coupon_is_exist = $this->model_extension_module_coupon_nik->isExist($coupon_code);
         $coupon_info = $this->model_extension_module_coupon_nik->getCoupon($coupon_code);
 
-        if ($coupon_info) {
+        if ($coupon_is_exist && $coupon_info) {
             $coupon_info = $coupon_info[0];
             $url = '';
 
@@ -88,7 +89,11 @@ class ControllerExtensionModuleCouponNik extends Controller {
             $this->document->addScript('catalog/view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.js');
             $this->document->addStyle('catalog/view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.css');
 
-            $data['heading_title'] = $coupon_info['name'] . ' - ' . $coupon_info['code'];
+            $data['heading_title'] = $coupon_info['name'];
+            $data['coupon_code'] = $coupon_info['code'];
+            $data['coupon_name'] = $coupon_info['name'];
+            $data['coupon_type'] = $coupon_info['type'];
+            $data['coupon_discount'] = (int)$coupon_info['discount'];
 
 //            $data['text_minimum'] = sprintf($this->language->get('text_minimum'), $product_info['minimum']);
             $data['text_login'] = sprintf($this->language->get('text_login'), $this->url->link('account/login', '', true), $this->url->link('account/register', '', true));
@@ -101,56 +106,8 @@ class ControllerExtensionModuleCouponNik extends Controller {
             $data['header'] = $this->load->controller('common/header');
 
             $this->response->setOutput($this->load->view('extension/module/coupon_nik', $data));
-        } else {
+        } else {;
             $url = '';
-
-            if (isset($this->request->get['path'])) {
-                $url .= '&path=' . $this->request->get['path'];
-            }
-
-            if (isset($this->request->get['filter'])) {
-                $url .= '&filter=' . $this->request->get['filter'];
-            }
-
-            if (isset($this->request->get['manufacturer_id'])) {
-                $url .= '&manufacturer_id=' . $this->request->get['manufacturer_id'];
-            }
-
-            if (isset($this->request->get['search'])) {
-                $url .= '&search=' . $this->request->get['search'];
-            }
-
-            if (isset($this->request->get['tag'])) {
-                $url .= '&tag=' . $this->request->get['tag'];
-            }
-
-            if (isset($this->request->get['description'])) {
-                $url .= '&description=' . $this->request->get['description'];
-            }
-
-            if (isset($this->request->get['category_id'])) {
-                $url .= '&category_id=' . $this->request->get['category_id'];
-            }
-
-            if (isset($this->request->get['sub_category'])) {
-                $url .= '&sub_category=' . $this->request->get['sub_category'];
-            }
-
-            if (isset($this->request->get['sort'])) {
-                $url .= '&sort=' . $this->request->get['sort'];
-            }
-
-            if (isset($this->request->get['order'])) {
-                $url .= '&order=' . $this->request->get['order'];
-            }
-
-            if (isset($this->request->get['page'])) {
-                $url .= '&page=' . $this->request->get['page'];
-            }
-
-            if (isset($this->request->get['limit'])) {
-                $url .= '&limit=' . $this->request->get['limit'];
-            }
 
             $data['breadcrumbs'][] = array(
                 'text' => $this->language->get('text_error'),
@@ -158,6 +115,8 @@ class ControllerExtensionModuleCouponNik extends Controller {
             );
 
             $this->document->setTitle($this->language->get('text_error'));
+
+            $data['heading_title'] = "Ошибка!";
 
             $data['continue'] = $this->url->link('common/home');
 
@@ -175,7 +134,15 @@ class ControllerExtensionModuleCouponNik extends Controller {
     }
 
     public function getCoupon() {
+        if($this->request->get['code']) {
+            $this->load->model('extension/module/coupon_nik');
 
-        $this->response->setOutput(true);
+            if ($this->customer->isLogged()) {
+                $this->model_extension_module_coupon_nik->useCoupon($this->request->get['code'], $this->customer->isLogged());
+                $this->response->setOutput(true);
+            } else {
+                $this->response->setOutput(false);
+            }
+        }
     }
 }
