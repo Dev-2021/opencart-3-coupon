@@ -64,8 +64,20 @@ class ControllerExtensionModuleCouponNik extends Controller {
             } else {
                 if(strtotime($coupon_info['date_start']) <= strtotime(date('Y-m-d')) && strtotime($coupon_info['date_end']) >= strtotime(date('Y-m-d'))) {
                     if($coupon_info['uses_total'] > $couponUsedCount) {
-                        $data['can_use'] = true;
-                        $data['can_use_message'] = '';
+                        if($this->customer->isLogged()) {
+                            $couponUsedCountByUser = $this->model_extension_module_coupon_nik->getCouponUsedCountByCustomer($coupon_info['coupon_id'], $this->customer->isLogged());
+                            if($coupon_info['uses_customer'] > $couponUsedCountByUser) {
+                                $data['can_use'] = true;
+                                $data['can_use_message'] = '';
+                            } else {
+                                // error
+                                $data['can_use'] = false;
+                                $data['can_use_message'] = 'Вы больше не можете использовать данный купон!';
+                            }
+                        } else {
+                            $data['can_use'] = true;
+                            $data['can_use_message'] = '';
+                        }
                     } else {
                         // error
                         $data['can_use'] = false;
