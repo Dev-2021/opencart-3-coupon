@@ -46,7 +46,7 @@ class ModelExtensionModuleCouponNik extends Model {
     }
 
     public function isExist($code) {
-        $sql = "SELECT `coupon_id` FROM " . DB_PREFIX . "customer_coupon WHERE `coupon_code` = '" . $this->db->escape($code) . "'";
+        $sql = "SELECT `coupon_id` FROM " . DB_PREFIX . "customer_coupon WHERE `coupon_code` = '" . $this->db->escape($code) . "' AND `coupon_link` <> ''";
 
         $query = $this->db->query($sql);
 
