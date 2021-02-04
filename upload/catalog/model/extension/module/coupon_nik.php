@@ -83,6 +83,14 @@ class ModelExtensionModuleCouponNik extends Model {
         return $query->rows[0]['q'];
     }
 
+    public function getCouponGettingCountByCustomer($coupon_id, $customer_id) {
+        $sql = "SELECT COUNT(`customer_id`) as q FROM " . DB_PREFIX . "customer_coupon WHERE `coupon_id` = '" . (int)$coupon_id . "' AND `customer_id` = '" . (int)$customer_id . "'";
+
+        $query = $this->db->query($sql);
+
+        return $query->rows[0]['q'];
+    }
+
     public function log($data) {
         // if ($this->config->has('payment_stripe_logging') && $this->config->get('payment_stripe_logging')) {
         $log = new Log('mailing.log');

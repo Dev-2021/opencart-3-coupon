@@ -77,6 +77,9 @@
                                     {% else %}
                                         <a href="{{ sort_date_end }}">{{ column_date_end }}</a>
                                     {% endif %}</td>
+                              <td class="text-left">
+                                <span>Link</span>
+                              </td>
                                 <td class="text-left">{% if sort == 'status' %}
                                         <a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a>
                                     {% else %}
@@ -99,6 +102,9 @@
                                         <td class="text-right">{{ coupon.discount }}</td>
                                         <td class="text-left">{{ coupon.date_start }}</td>
                                         <td class="text-left">{{ coupon.date_end }}</td>
+                                        <td class="text-left">
+                                          <a href="{{ coupon.coupon_link }}" target="_blank">{{ text_link }}</a>
+                                        </td>
                                         <td class="text-left">{{ coupon.status }}</td>
                                         <td class="text-right"><a href="{{ coupon.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
                                     </tr>

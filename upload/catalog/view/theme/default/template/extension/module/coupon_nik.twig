@@ -42,12 +42,9 @@
                 let text = 'Купон {{ coupon_name }} на скидку {{ coupon_discount }}' + ('{{ coupon_type }}' === 'P' ? '%' : 'руб.') + ' успешно получен. Его код - {{ coupon_code }}. '
                 $('#get-coupon').hide();
                 $('#responseMessage').text(text)
-                console.log(res)
-                if(res) {
-                    setTimeout('window.history.back()',5000);
-                } else {
-                    $('#responseMessage').append('Не забудьте сохранить его и использовать при покупке!');
-                }
+
+                $('#responseMessage').append('Не забудьте сохранить его и использовать при покупке! ');
+                $('#responseMessage').append('<a href="/">Перейти на главную страницу</a>');
             }
         });
     }

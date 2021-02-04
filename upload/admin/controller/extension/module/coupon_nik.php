@@ -42,7 +42,7 @@ class ControllerExtensionModuleCouponNik extends Controller {
                     );
                     $this->model_extension_module_coupon_nik->add($data);
 
-                    if($coupon_template['send']) {
+                    if(isset($coupon_template['send'])) {
                         // send to customers
                         $send_info = array(
                             'email' => $customer['email'],
@@ -55,8 +55,9 @@ class ControllerExtensionModuleCouponNik extends Controller {
                 }
 
             } else {
+
                 for($i = 0; $i < $coupon_template['coupon_count']; $i++) {
-                    $coupon_template['name'] = 'Купон №' . ($i + 1);
+                    $coupon_template['name'] = 'Купон №' . ($i + 1) . ($coupon_template['discount'] ? ' ' . $this->language->get('entry_discount') . ' ' . $coupon_template['discount'] . ($coupon_template['type'] == 'P' ? '%' : '') : "") . ($coupon_template['uses_total'] ? ' ' . $this->language->get('text_uses') . ' ' . $coupon_template['uses_total'] : "");
                     $coupon_template['code'] = $this->generateCode();
 
                     $coupon_id = $this->model_marketing_coupon->addCoupon($coupon_template);
@@ -243,6 +244,13 @@ class ControllerExtensionModuleCouponNik extends Controller {
         }
 
         foreach ($results as $result) {
+            $link = $this->url->link('extension/module/coupon_nik', '&code=' . $result['code'], true);
+            $link_arr = explode('/', $link);
+            foreach ($link_arr as $k => $item) {
+                if ($item == 'admin') {
+                    unset($link_arr[$k]);
+                }
+            }
             $data['coupons'][] = array(
                 'coupon_id'  => $result['coupon_id'],
                 'name'       => $result['name'],
@@ -250,6 +258,7 @@ class ControllerExtensionModuleCouponNik extends Controller {
                 'discount'   => $result['discount'],
                 'date_start' => date($this->language->get('date_format_short'), strtotime($result['date_start'])),
                 'date_end'   => date($this->language->get('date_format_short'), strtotime($result['date_end'])),
+                'coupon_link'=> implode('/', $link_arr),
                 'status'     => ($result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled')),
                 'edit'       => $this->url->link('marketing/coupon/edit', 'user_token=' . $this->session->data['user_token'] . '&coupon_id=' . $result['coupon_id'] . $url, true)
             );
@@ -468,7 +477,7 @@ class ControllerExtensionModuleCouponNik extends Controller {
             foreach ($results as $result) {
                 $json[] = array(
                     'customer_id' => $result['customer_id'],
-                    'name'        => strip_tags(html_entity_decode($result['name'], ENT_QUOTES, 'UTF-8')),
+                    'name'        => strip_tags(html_entity_decode($result['name'] . ' (' . $result['customer_group'] . ')', ENT_QUOTES, 'UTF-8')),
                 );
             }
         }

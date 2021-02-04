@@ -35,21 +35,28 @@ class ControllerExtensionModuleCouponNik extends Controller {
             if($coupon_info['logged']) {
                 if($this->customer->isLogged()) {
                     $couponUsedCountByUser = $this->model_extension_module_coupon_nik->getCouponUsedCountByCustomer($coupon_info['coupon_id'], $this->customer->isLogged());
+                    $couponGetCountByUser = $this->model_extension_module_coupon_nik->getCouponGettingCountByCustomer($coupon_info['coupon_id'], $this->customer->isLogged());
 
                     if(strtotime($coupon_info['date_start']) <= strtotime(date('Y-m-d')) && strtotime($coupon_info['date_end']) >= strtotime(date('Y-m-d'))) {
-                        if((int)$coupon_info['uses_total'] > (int)$couponUsedCount) {
-                            if($coupon_info['uses_customer'] > $couponUsedCountByUser) {
-                                $data['can_use'] = true;
-                                $data['can_use_message'] = '';
+                        if ($couponGetCountByUser < 1) {
+                            if((int)$coupon_info['uses_total'] > (int)$couponUsedCount) {
+                                if($coupon_info['uses_customer'] > $couponUsedCountByUser) {
+                                    $data['can_use'] = true;
+                                    $data['can_use_message'] = '';
+                                } else {
+                                    // error
+                                    $data['can_use'] = false;
+                                    $data['can_use_message'] = 'Вы больше не можете использовать данный купон!';
+                                }
                             } else {
                                 // error
                                 $data['can_use'] = false;
-                                $data['can_use_message'] = 'Вы больше не можете использовать данный купон!';
+                                $data['can_use_message'] = 'Данный купон закончился';
                             }
                         } else {
                             // error
                             $data['can_use'] = false;
-                            $data['can_use_message'] = 'Данный купон закончился';
+                            $data['can_use_message'] = 'Вы уже активировали данный купон';
                         }
                     } else {
                         // error
