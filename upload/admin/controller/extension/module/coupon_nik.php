@@ -55,9 +55,19 @@ class ControllerExtensionModuleCouponNik extends Controller {
                 }
 
             } else {
-
+                $count = '';
+                $names = $this->model_extension_module_coupon_nik->getCouponsByName('Купон №');
+                $last_name = end($names);
+                if ($last_name) {
+                    $part = explode(' ', $last_name['name']);
+                    $count = (int)ltrim($part[1],'№');
+                }
                 for($i = 0; $i < $coupon_template['coupon_count']; $i++) {
-                    $coupon_template['name'] = 'Купон №' . ($i + 1) . ($coupon_template['discount'] ? ' ' . $this->language->get('entry_discount') . ' ' . $coupon_template['discount'] . ($coupon_template['type'] == 'P' ? '%' : '') : "") . ($coupon_template['uses_total'] ? ' ' . $this->language->get('text_uses') . ' ' . $coupon_template['uses_total'] : "");
+                    if(is_int($count)) {
+                        $coupon_template['name'] = 'Купон №' . ($count + $i + 1) . ($coupon_template['discount'] ? ' ' . $this->language->get('entry_discount') . ' ' . $coupon_template['discount'] . ($coupon_template['type'] == 'P' ? '%' : '') : "") . ($coupon_template['uses_total'] ? ' ' . $this->language->get('text_uses') . ' ' . $coupon_template['uses_total'] : "");
+                    } else {
+                        $coupon_template['name'] = 'Купон №' . ($i + 1) . ($coupon_template['discount'] ? ' ' . $this->language->get('entry_discount') . ' ' . $coupon_template['discount'] . ($coupon_template['type'] == 'P' ? '%' : '') : "") . ($coupon_template['uses_total'] ? ' ' . $this->language->get('text_uses') . ' ' . $coupon_template['uses_total'] : "");
+                    }
                     $coupon_template['code'] = $this->generateCode();
 
                     $coupon_id = $this->model_marketing_coupon->addCoupon($coupon_template);

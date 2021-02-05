@@ -252,6 +252,7 @@
         $('#coupon-customer div').each(function (i, item) {
             $(item).remove()
         })
+        $('#customers-groups option:first').prop('selected', true);
     }
 
     if($('#input-coupon-receive-method').val() === "1") {

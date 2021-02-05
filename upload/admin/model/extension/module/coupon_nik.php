@@ -75,6 +75,12 @@ class ModelExtensionModuleCouponNik extends Model {
         return $query->rows;
     }
 
+    public function getCouponsByName($name) {
+        $query = $this->db->query("SELECT `name` FROM " . DB_PREFIX . "coupon WHERE `name` LIKE '" . $name . "%'");
+
+        return $query->rows;
+    }
+
     public function repairRelations() {
         $query = $this->db->query("SELECT `coupon_id` FROM " . DB_PREFIX . "customer_coupon");
 
