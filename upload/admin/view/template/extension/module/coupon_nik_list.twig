@@ -4,7 +4,8 @@
         <div class="container-fluid">
           <div class="pull-right">
             <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
-            <button type="button" onclick="confirm('{{ confirm_repair }}') ? document.location.href = '{{ repair }}' : false;" data-toggle="tooltip" title="" class="btn btn-default" data-original-title="Починить"><i class="fa fa-refresh"></i></button>
+            <button type="button" onclick="confirm('{{ confirm_repair }}') ? document.location.href = '{{ repair }}' : false;" data-toggle="tooltip" title="{{ button_repair }}" class="btn btn-default"><i class="fa fa-refresh"></i></button>
+            <button type="button" data-toggle="modal" data-target="#sendCouponsModal" data-toggle="tooltip" title="{{ button_send_coupons }}" class="btn btn-info"><i class="fa fa-envelope"></i></button>
             <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-coupon').submit() : false;"><i class="fa fa-trash-o"></i></button>
             <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
           </div>
@@ -78,7 +79,7 @@
                                         <a href="{{ sort_date_end }}">{{ column_date_end }}</a>
                                     {% endif %}</td>
                               <td class="text-left">
-                                <span>Link</span>
+                                <span>{{ column_link }}</span>
                               </td>
                                 <td class="text-left">{% if sort == 'status' %}
                                         <a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a>
@@ -106,12 +107,15 @@
                                           <a href="{{ coupon.coupon_link }}" target="_blank">{{ text_link }}</a>
                                         </td>
                                         <td class="text-left">{{ coupon.status }}</td>
-                                        <td class="text-right"><a href="{{ coupon.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+                                        <td class="text-right">
+                                          <button type="button" onclick="confirm('{{ confirm_send_coupon }}') ? sendCoupon() : false;" data-toggle="tooltip" title="{{ button_send_coupon }}" class="btn btn-info"><i class="fa fa-envelope"></i></button>
+                                          <a href="{{ coupon.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a>
+                                        </td>
                                     </tr>
                                 {% endfor %}
                             {% else %}
                                 <tr>
-                                    <td class="text-center" colspan="8">{{ text_no_results }}</td>
+                                    <td class="text-center" colspan="9">{{ text_no_results }}</td>
                                 </tr>
                             {% endif %}
                             </tbody>
@@ -128,6 +132,32 @@
     </div>
 </div>
 
+<div class="modal" id="sendCouponsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header"></div>
+      <div class="modal-body">
+        <p>{{ confirm_send_coupons }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="sendCoupons()">{{ text_yes }}</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ button_cancel }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="sendedCouponsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header"></div>
+      <div class="modal-body">
+        <p>{{ text_success_sended_coupons }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script type="text/javascript">
     $('#button-filter').on('click', function() {
         url = 'index.php?route=extension/module/coupon_nik&user_token={{ user_token }}';
@@ -141,6 +171,23 @@
         url = 'index.php?route=extension/module/coupon_nik&user_token={{ user_token }}';
         location = url;
     });
+
+    function sendCoupons() {
+        $.ajax({
+            url: 'index.php?route=extension/module/coupon_nik/sendCoupons&user_token={{ user_token }}',
+            type: 'POST',
+            beforeSend: function() {
+              $('#sendCouponsModal').modal('hide')
+            },
+            success: function () {
+                $('#sendedCouponsModal').modal('show')
+            }
+        })
+    }
+
+    function sendCoupon() {
+        console.log('sended')
+    }
 </script>
 
 {{footer}}

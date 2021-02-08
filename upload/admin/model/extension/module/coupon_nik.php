@@ -6,14 +6,21 @@ class ModelExtensionModuleCouponNik extends Model {
 			`id` INT(11) NOT NULL AUTO_INCREMENT,
 			`coupon_id` INT(11) NOT NULL,
 			`coupon_code` varchar(50) NOT NULL,
-			`customer_id` INT(11) NOT NULL,
+			`customer_id` INT(11) DEFAULT NULL,
 			`coupon_link` varchar(255) NOT NULL,
+			PRIMARY KEY (`id`)
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci");
+        $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "customer_coupon_history` (
+			`id` INT(11) NOT NULL AUTO_INCREMENT,
+			`coupon_id` INT(11) NOT NULL,
+			`customer_id` INT(11) NOT NULL,
 			PRIMARY KEY (`id`)
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci");
     }
 
     public function uninstall() {
         $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "customer_coupon`");
+        $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "customer_coupon_history`");
 
         $this->log('Module uninstalled');
     }
@@ -30,26 +37,33 @@ class ModelExtensionModuleCouponNik extends Model {
         $this->cache->delete('customer_coupon');
     }
 
+    public function getCoupon($coupon_id) {
+        $query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "customer_coupon WHERE coupon_id = '" . (int)$coupon_id . "'");
+
+        return $query->row;
+    }
+
     public function getCoupons($data = array()) {
-        $sql = "SELECT `coupon_id`, `name`, `code`, `discount`, `date_start`, `date_end`, `status` FROM " . DB_PREFIX . "coupon";
+        $sql = "SELECT c.`coupon_id`, c.`name`, c.`code`, c.`type`, c.`discount`, c.`uses_total`, c.`date_start`, c.`date_end`, c.`status`, cc.`customer_id` FROM " . DB_PREFIX . "coupon c LEFT JOIN " . DB_PREFIX ."customer_coupon cc ON c.coupon_id = cc.coupon_id";
 
         if (!empty($data['filter_code'])) {
             $sql .= " WHERE code LIKE '" . $this->db->escape($data['filter_code']) . "%'";
         }
 
         $sort_data = array(
-            'name',
-            'code',
-            'discount',
-            'date_start',
-            'date_end',
-            'status'
+            'c.coupon_id',
+            'c.name',
+            'c.code',
+            'c.discount',
+            'c.date_start',
+            'c.date_end',
+            'c.status'
         );
 
         if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
             $sql .= " ORDER BY " . $data['sort'];
         } else {
-            $sql .= " ORDER BY name";
+            $sql .= " ORDER BY c.`coupon_id`";
         }
 
         if (isset($data['order']) && ($data['order'] == 'DESC')) {
@@ -77,6 +91,12 @@ class ModelExtensionModuleCouponNik extends Model {
 
     public function getCouponsByName($name) {
         $query = $this->db->query("SELECT `name` FROM " . DB_PREFIX . "coupon WHERE `name` LIKE '" . $name . "%'");
+
+        return $query->rows;
+    }
+
+    public function getCouponsWithCustomer() {
+        $query = $this->db->query("SELECT `coupon_code`, `customer_id`, `coupon_link` FROM " . DB_PREFIX . "customer_coupon WHERE `customer_id` <> 0");
 
         return $query->rows;
     }

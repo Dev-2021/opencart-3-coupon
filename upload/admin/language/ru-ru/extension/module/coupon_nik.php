@@ -16,6 +16,7 @@ $_['text_with_link']      = 'По ссылке';
 $_['text_customers_groups']= 'Группы клиентов';
 $_['text_uses']           = 'Применений';
 $_['text_link']           = 'Ссылка';
+$_['text_success_sended_coupons']= 'Купоны успешно отправлены!';
 
 // Entry
 $_['entry_name']          = 'Название Купона';
@@ -51,9 +52,12 @@ $_['column_customer']     = 'Клиент';
 $_['column_amount']       = 'Сумма';
 $_['column_date_added']   = 'Дата';
 $_['column_action']       = 'Действие';
+$_['column_link']         = 'Ссылка на купон';
 
 // Confirm
 $_['confirm_repair']      = 'Вы уверены, что хотите удалить все ненужные связи?';
+$_['confirm_send_coupon'] = 'Отправить купон пользователю?';
+$_['confirm_send_coupons']= 'Отправить купоны зарегистрированным пользователям?';
 
 // Help
 $_['help_code']           = 'Данный код, клиент вводит для получения скидки.';
@@ -78,3 +82,6 @@ $_['error_permission']    = 'Вы не имеете прав на редакти
 $_['button_save']           = 'Сохранить';
 $_['button_select_all']     = 'Выбрать всех';
 $_['button_select_marked']  = 'Выбрать отмеченных';
+$_['button_send_coupons']   = 'Отправить купоны';
+$_['button_send_coupon']    = 'Отправить купон';
+$_['button_repair']         = 'Починить';
