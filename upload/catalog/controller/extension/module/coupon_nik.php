@@ -32,14 +32,91 @@ class ControllerExtensionModuleCouponNik extends Controller {
 
             $couponUsedCount = $this->model_extension_module_coupon_nik->getCouponUsedCount($coupon_info['coupon_id']);
 
-            if($coupon_info['logged']) {
-                if($this->customer->isLogged()) {
-                    $couponUsedCountByUser = $this->model_extension_module_coupon_nik->getCouponUsedCountByCustomer($coupon_info['coupon_id'], $this->customer->isLogged());
-                    $couponGetCountByUser = $this->model_extension_module_coupon_nik->getCouponGettingCountByCustomer($coupon_info['coupon_id'], $this->customer->isLogged());
 
+
+            if ($coupon_info['customer_id'] != "0") {
+                if($this->customer->isLogged() == 0) {
+                    $data['can_use'] = false;
+                    $data['can_use_message'] = 'Для использования купона необходимо авторизоваться!';
+                } else {
+                    if($this->customer->isLogged() == $coupon_info['customer_id']) {
+                        $couponUsedCountByUser = $this->model_extension_module_coupon_nik->getCouponUsedCountByCustomer($coupon_info['coupon_id'], $this->customer->isLogged());
+                        $couponGetCountByUser = $this->model_extension_module_coupon_nik->getCouponGettingCountByCustomer($coupon_info['coupon_id'], $this->customer->isLogged());
+
+                        if(strtotime($coupon_info['date_start']) <= strtotime(date('Y-m-d')) && strtotime($coupon_info['date_end']) >= strtotime(date('Y-m-d'))) {
+                            if ($couponGetCountByUser < 1) {
+                                if((int)$coupon_info['uses_total'] > (int)$couponUsedCount) {
+                                    if($coupon_info['uses_customer'] > $couponUsedCountByUser) {
+                                        $data['can_use'] = true;
+                                        $data['can_use_message'] = '';
+                                    } else {
+                                        // error
+                                        $data['can_use'] = false;
+                                        $data['can_use_message'] = 'Вы больше не можете использовать данный купон!';
+                                    }
+                                } else {
+                                    // error
+                                    $data['can_use'] = false;
+                                    $data['can_use_message'] = 'Данный купон закончился';
+                                }
+                            } else {
+                                // error
+                                $data['can_use'] = false;
+                                $data['can_use_message'] = 'Вы уже активировали данный купон';
+                            }
+                        } else {
+                            // error
+                            $data['can_use'] = false;
+                            $data['can_use_message'] = 'Время действия купона истекло';
+                        }
+                    } else {
+                        $data['can_use'] = false;
+                        $data['can_use_message'] = 'Данный купон предназначен для другого пользователя.';
+                    }
+                }
+            } else {
+                if($coupon_info['logged']) {
+                    if($this->customer->isLogged()) {
+                        $couponUsedCountByUser = $this->model_extension_module_coupon_nik->getCouponUsedCountByCustomer($coupon_info['coupon_id'], $this->customer->isLogged());
+                        $couponGetCountByUser = $this->model_extension_module_coupon_nik->getCouponGettingCountByCustomer($coupon_info['coupon_id'], $this->customer->isLogged());
+
+                        if(strtotime($coupon_info['date_start']) <= strtotime(date('Y-m-d')) && strtotime($coupon_info['date_end']) >= strtotime(date('Y-m-d'))) {
+                            if ($couponGetCountByUser < 1) {
+                                if((int)$coupon_info['uses_total'] > (int)$couponUsedCount) {
+                                    if($coupon_info['uses_customer'] > $couponUsedCountByUser) {
+                                        $data['can_use'] = true;
+                                        $data['can_use_message'] = '';
+                                    } else {
+                                        // error
+                                        $data['can_use'] = false;
+                                        $data['can_use_message'] = 'Вы больше не можете использовать данный купон!';
+                                    }
+                                } else {
+                                    // error
+                                    $data['can_use'] = false;
+                                    $data['can_use_message'] = 'Данный купон закончился';
+                                }
+                            } else {
+                                // error
+                                $data['can_use'] = false;
+                                $data['can_use_message'] = 'Вы уже активировали данный купон';
+                            }
+                        } else {
+                            // error
+                            $data['can_use'] = false;
+                            $data['can_use_message'] = 'Время действия купона истекло';
+                        }
+                    } else {
+                        // error
+                        $data['can_use'] = false;
+                        $data['can_use_message'] = 'Для использования купона необходимо авторизоваться!';
+                    }
+                } else {
                     if(strtotime($coupon_info['date_start']) <= strtotime(date('Y-m-d')) && strtotime($coupon_info['date_end']) >= strtotime(date('Y-m-d'))) {
-                        if ($couponGetCountByUser < 1) {
-                            if((int)$coupon_info['uses_total'] > (int)$couponUsedCount) {
+                        if($coupon_info['uses_total'] > $couponUsedCount) {
+                            if($this->customer->isLogged()) {
+                                $couponUsedCountByUser = $this->model_extension_module_coupon_nik->getCouponUsedCountByCustomer($coupon_info['coupon_id'], $this->customer->isLogged());
+
                                 if($coupon_info['uses_customer'] > $couponUsedCountByUser) {
                                     $data['can_use'] = true;
                                     $data['can_use_message'] = '';
@@ -49,51 +126,19 @@ class ControllerExtensionModuleCouponNik extends Controller {
                                     $data['can_use_message'] = 'Вы больше не можете использовать данный купон!';
                                 }
                             } else {
-                                // error
-                                $data['can_use'] = false;
-                                $data['can_use_message'] = 'Данный купон закончился';
+                                $data['can_use'] = true;
+                                $data['can_use_message'] = '';
                             }
                         } else {
                             // error
                             $data['can_use'] = false;
-                            $data['can_use_message'] = 'Вы уже активировали данный купон';
+                            $data['can_use_message'] = 'Данный купон закончился';
                         }
                     } else {
                         // error
                         $data['can_use'] = false;
                         $data['can_use_message'] = 'Время действия купона истекло';
                     }
-                } else {
-                    // error
-                    $data['can_use'] = false;
-                    $data['can_use_message'] = 'Для использования купона необходимо авторизоваться!';
-                }
-            } else {
-                if(strtotime($coupon_info['date_start']) <= strtotime(date('Y-m-d')) && strtotime($coupon_info['date_end']) >= strtotime(date('Y-m-d'))) {
-                    if($coupon_info['uses_total'] > $couponUsedCount) {
-                        if($this->customer->isLogged()) {
-                            $couponUsedCountByUser = $this->model_extension_module_coupon_nik->getCouponUsedCountByCustomer($coupon_info['coupon_id'], $this->customer->isLogged());
-                            if($coupon_info['uses_customer'] > $couponUsedCountByUser) {
-                                $data['can_use'] = true;
-                                $data['can_use_message'] = '';
-                            } else {
-                                // error
-                                $data['can_use'] = false;
-                                $data['can_use_message'] = 'Вы больше не можете использовать данный купон!';
-                            }
-                        } else {
-                            $data['can_use'] = true;
-                            $data['can_use_message'] = '';
-                        }
-                    } else {
-                        // error
-                        $data['can_use'] = false;
-                        $data['can_use_message'] = 'Данный купон закончился';
-                    }
-                } else {
-                    // error
-                    $data['can_use'] = false;
-                    $data['can_use_message'] = 'Время действия купона истекло';
                 }
             }
 

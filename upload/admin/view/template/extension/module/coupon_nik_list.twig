@@ -5,7 +5,7 @@
           <div class="pull-right">
             <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
             <button type="button" onclick="confirm('{{ confirm_repair }}') ? document.location.href = '{{ repair }}' : false;" data-toggle="tooltip" title="{{ button_repair }}" class="btn btn-default"><i class="fa fa-refresh"></i></button>
-            <button type="button" data-toggle="modal" data-target="#sendCouponsModal" data-toggle="tooltip" title="{{ button_send_coupons }}" class="btn btn-info"><i class="fa fa-envelope"></i></button>
+            <button type="button"  data-target="#sendCouponsModal" data-toggle="modal" data-tooltip="tooltip" title="{{ button_send_coupons }}" class="btn btn-info"><span><i class="fa fa-envelope"></i></span></button>
             <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-coupon').submit() : false;"><i class="fa fa-trash-o"></i></button>
             <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
           </div>
@@ -108,7 +108,7 @@
                                         </td>
                                         <td class="text-left">{{ coupon.status }}</td>
                                         <td class="text-right">
-                                          <button type="button" onclick="confirm('{{ confirm_send_coupon }}') ? sendCoupon() : false;" data-toggle="tooltip" title="{{ button_send_coupon }}" class="btn btn-info"><i class="fa fa-envelope"></i></button>
+                                          <button type="button" onclick="getCustomerCouponModal({{ coupon.coupon_id }},{{ coupon.customer_id }})" data-toggle="tooltip" title="{{ button_send_coupon }}" class="btn btn-info"><i class="fa fa-envelope"></i></button>
                                           <a href="{{ coupon.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a>
                                         </td>
                                     </tr>
@@ -154,11 +154,67 @@
       <div class="modal-body">
         <p>{{ text_success_sended_coupons }}</p>
       </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ button_close }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="sendCouponToCustomerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header"></div>
+      <div class="modal-body">
+        <p>{{ confirm_send_coupon }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="sendCouponCustomer">{{ text_yes }}</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ button_cancel }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="sendCouponToCustomerModalWithEmail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header"></div>
+      <div class="modal-body">
+        <p>{{ confirm_who_send_coupon }}</p>
+        <div class="row">
+          <div class="form-group">
+            <div class="col-sm-12" id="div-send-coupon-customer-with-email">
+              <input type="text" name="customer_email_send_coupon" value="" placeholder="{{ entry_email }}" id="input-send-coupon-customer-with-email" class="form-control" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="sendCouponCustomerWithEmail">{{ button_send }}</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ button_cancel }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="sendedCouponModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header"></div>
+      <div class="modal-body">
+        <p>{{ text_success_sended_coupon }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ button_close }}</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script type="text/javascript">
+    $('[data-tooltip="tooltip"]').tooltip();
+
     $('#button-filter').on('click', function() {
         url = 'index.php?route=extension/module/coupon_nik&user_token={{ user_token }}';
         var filter_code = $('input[name=\'filter_code\']').val();
@@ -185,9 +241,81 @@
         })
     }
 
-    function sendCoupon() {
-        console.log('sended')
+    function getCustomerCouponModal(couponId, customerId) {
+        if(customerId) {
+            // show modal confirm send to customer coupon
+            $('#sendCouponToCustomerModal').modal('show')
+            _sendCouponCustomer(couponId, false)
+        } else {
+            // show modal with input email
+            $('#sendCouponToCustomerModalWithEmail').modal('show')
+            _sendCouponCustomerWithEmail(couponId)
+        }
     }
+
+    function sendCoupon(couponId, customerEmail) {
+        // handle entry data
+        $.ajax({
+            url: 'index.php?route=extension/module/coupon_nik/sendCouponToCustomer&user_token={{ user_token }}&coupon_id=' + couponId + (customerEmail ? '&customer_email='+customerEmail : '' ),
+            type: 'GET',
+            beforeSend: function() {
+                $('#sendCouponToCustomerModal').modal('hide')
+                $('#sendCouponToCustomerModalWithEmail').modal('hide')
+                $('#input-send-coupon-customer-with-email').val('')
+            },
+            success: function () {
+                $('#sendedCouponModal').modal('show')
+            }
+        })
+    }
+
+    function _sendCouponCustomer(couponId) {
+        $('#sendCouponCustomer').unbind('click')
+        $('#sendCouponCustomer').on('click', function () {
+            sendCoupon(couponId);
+        })
+    }
+
+    function _sendCouponCustomerWithEmail(couponId) {
+        $('#sendCouponCustomerWithEmail').unbind('click')
+        $('#sendCouponCustomerWithEmail').on('click', function () {
+            $('#div-send-coupon-customer-with-email').find('.text-danger').remove()
+            if ($('#input-send-coupon-customer-with-email').val()) {
+                if(validateEmail($('#input-send-coupon-customer-with-email').val())) {
+                    sendCoupon(couponId, $('#input-send-coupon-customer-with-email').val())
+                } else {
+                    $('#div-send-coupon-customer-with-email').append('<div class="text-danger">{{ error_email }}</div>')
+                }
+
+            }
+        })
+    }
+
+    function validateEmail(email) {
+        const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
+    }
+
+    // Customers
+    $('input[name=\'customer_email_send_coupon\']').autocomplete({
+        'source': function(request, response) {
+            $.ajax({
+                url: 'index.php?route=customer/customer/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+                dataType: 'json',
+                success: function(json) {
+                    response($.map(json, function(item) {
+                        return {
+                            label: item['email'],
+                        }
+                    }));
+                }
+            });
+        },
+        'select': function(item) {
+            $('#input-send-coupon-customer-with-email').val(item['label']);
+        }
+    });
+
 </script>
 
 {{footer}}

@@ -56,11 +56,11 @@ class ModelExtensionModuleCouponNik extends Model {
     public function useCoupon($code, $customer_id) {
         $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "customer_coupon WHERE `coupon_code` = '" . $this->db->escape($code) . "'");
         $coupon_info = $query->rows[0];
-        $this->db->query("INSERT INTO " . DB_PREFIX . "customer_coupon SET `coupon_id` = '" . (int)$coupon_info['coupon_id'] . "', coupon_code = '" . $this->db->escape($code) . "', customer_id = '" . (int)$customer_id . "', coupon_link = '" . $this->db->escape($coupon_info['coupon_link']) . "'");
+        $this->db->query("INSERT INTO " . DB_PREFIX . "customer_coupon_history SET `coupon_id` = '" . (int)$coupon_info['coupon_id'] . "', customer_id = '" . (int)$customer_id . "'");
     }
 
     public function getCoupon($code) {
-        $sql = "SELECT * FROM " . DB_PREFIX . "coupon WHERE `code` = '" . $this->db->escape($code) . "'";
+        $sql = "SELECT c.*, cc.`customer_id` FROM " . DB_PREFIX . "coupon c LEFT JOIN " . DB_PREFIX ."customer_coupon cc ON c.coupon_id = cc.coupon_id WHERE c.`code` = '" . $this->db->escape($code) . "'";
 
         $query = $this->db->query($sql);
 
@@ -84,7 +84,7 @@ class ModelExtensionModuleCouponNik extends Model {
     }
 
     public function getCouponGettingCountByCustomer($coupon_id, $customer_id) {
-        $sql = "SELECT COUNT(`customer_id`) as q FROM " . DB_PREFIX . "customer_coupon WHERE `coupon_id` = '" . (int)$coupon_id . "' AND `customer_id` = '" . (int)$customer_id . "'";
+        $sql = "SELECT COUNT(`customer_id`) as q FROM " . DB_PREFIX . "customer_coupon_history WHERE `coupon_id` = '" . (int)$coupon_id . "' AND `customer_id` = '" . (int)$customer_id . "'";
 
         $query = $this->db->query($sql);
 
