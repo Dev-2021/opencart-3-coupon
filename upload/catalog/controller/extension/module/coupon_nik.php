@@ -32,12 +32,10 @@ class ControllerExtensionModuleCouponNik extends Controller {
 
             $couponUsedCount = $this->model_extension_module_coupon_nik->getCouponUsedCount($coupon_info['coupon_id']);
 
-
-
             if ($coupon_info['customer_id'] != "0") {
                 if($this->customer->isLogged() == 0) {
                     $data['can_use'] = false;
-                    $data['can_use_message'] = 'Для использования купона необходимо авторизоваться!';
+                    $data['can_use_message'] = $this->language->get('error_coupon_not_exist');
                 } else {
                     if($this->customer->isLogged() == $coupon_info['customer_id']) {
                         $couponUsedCountByUser = $this->model_extension_module_coupon_nik->getCouponUsedCountByCustomer($coupon_info['coupon_id'], $this->customer->isLogged());
@@ -52,26 +50,26 @@ class ControllerExtensionModuleCouponNik extends Controller {
                                     } else {
                                         // error
                                         $data['can_use'] = false;
-                                        $data['can_use_message'] = 'Вы больше не можете использовать данный купон!';
+                                        $data['can_use_message'] = $this->language->get('error_cant_use_anymore');
                                     }
                                 } else {
                                     // error
                                     $data['can_use'] = false;
-                                    $data['can_use_message'] = 'Данный купон закончился';
+                                    $data['can_use_message'] = $this->language->get('error_coupon_is_out');
                                 }
                             } else {
                                 // error
                                 $data['can_use'] = false;
-                                $data['can_use_message'] = 'Вы уже активировали данный купон';
+                                $data['can_use_message'] = $this->language->get('error_activated_yet');
                             }
                         } else {
                             // error
                             $data['can_use'] = false;
-                            $data['can_use_message'] = 'Время действия купона истекло';
+                            $data['can_use_message'] = $this->language->get('error_coupon_time_is_expired');
                         }
                     } else {
                         $data['can_use'] = false;
-                        $data['can_use_message'] = 'Данный купон предназначен для другого пользователя.';
+                        $data['can_use_message'] = $this->language->get('error_not_for_you');
                     }
                 }
             } else {
@@ -89,27 +87,27 @@ class ControllerExtensionModuleCouponNik extends Controller {
                                     } else {
                                         // error
                                         $data['can_use'] = false;
-                                        $data['can_use_message'] = 'Вы больше не можете использовать данный купон!';
+                                        $data['can_use_message'] = $this->language->get('error_cant_use_anymore');
                                     }
                                 } else {
                                     // error
                                     $data['can_use'] = false;
-                                    $data['can_use_message'] = 'Данный купон закончился';
+                                    $data['can_use_message'] = $this->language->get('error_coupon_is_out');
                                 }
                             } else {
                                 // error
                                 $data['can_use'] = false;
-                                $data['can_use_message'] = 'Вы уже активировали данный купон';
+                                $data['can_use_message'] = $this->language->get('error_activated_yet');
                             }
                         } else {
                             // error
                             $data['can_use'] = false;
-                            $data['can_use_message'] = 'Время действия купона истекло';
+                            $data['can_use_message'] = $this->language->get('error_coupon_time_is_expired');
                         }
                     } else {
                         // error
                         $data['can_use'] = false;
-                        $data['can_use_message'] = 'Для использования купона необходимо авторизоваться!';
+                        $data['can_use_message'] = $this->language->get('error_need_auth');
                     }
                 } else {
                     if(strtotime($coupon_info['date_start']) <= strtotime(date('Y-m-d')) && strtotime($coupon_info['date_end']) >= strtotime(date('Y-m-d'))) {
@@ -123,7 +121,7 @@ class ControllerExtensionModuleCouponNik extends Controller {
                                 } else {
                                     // error
                                     $data['can_use'] = false;
-                                    $data['can_use_message'] = 'Вы больше не можете использовать данный купон!';
+                                    $data['can_use_message'] = $this->language->get('error_cant_use_anymore');
                                 }
                             } else {
                                 $data['can_use'] = true;
@@ -132,12 +130,12 @@ class ControllerExtensionModuleCouponNik extends Controller {
                         } else {
                             // error
                             $data['can_use'] = false;
-                            $data['can_use_message'] = 'Данный купон закончился';
+                            $data['can_use_message'] = $this->language->get('error_coupon_is_out');
                         }
                     } else {
                         // error
                         $data['can_use'] = false;
-                        $data['can_use_message'] = 'Время действия купона истекло';
+                        $data['can_use_message'] = $this->language->get('error_coupon_time_is_expired');
                     }
                 }
             }
@@ -159,7 +157,6 @@ class ControllerExtensionModuleCouponNik extends Controller {
             $data['coupon_type'] = $coupon_info['type'];
             $data['coupon_discount'] = (int)$coupon_info['discount'];
 
-//            $data['text_minimum'] = sprintf($this->language->get('text_minimum'), $product_info['minimum']);
             $data['text_login'] = sprintf($this->language->get('text_login'), $this->url->link('account/login', '', true), $this->url->link('account/register', '', true));
 
             $data['column_left'] = $this->load->controller('common/column_left');
@@ -174,13 +171,13 @@ class ControllerExtensionModuleCouponNik extends Controller {
             $url = '';
 
             $data['breadcrumbs'][] = array(
-                'text' => $this->language->get('text_error'),
+                'text' => $this->language->get('error_coupon_not_exist'),
                 'href' => $this->url->link('extension/module/coupon_nik', $url . '&code=' . $coupon_code)
             );
 
-            $this->document->setTitle($this->language->get('text_error'));
+            $this->document->setTitle($this->language->get('error_coupon_not_exist'));
 
-            $data['heading_title'] = "Ошибка!";
+            $data['heading_title'] = $this->language->get('text_error');
 
             $data['continue'] = $this->url->link('common/home');
 

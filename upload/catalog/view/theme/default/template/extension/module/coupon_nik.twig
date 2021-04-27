@@ -26,7 +26,7 @@
         <h4>{{ can_use_message }}</h4>
 
         {% if can_use %}
-        <button id="get-coupon" onclick="event.preventDefault();getCoupon()" data-toggle="tooltip" class="btn btn-primary">Получить</button>
+        <button id="get-coupon" onclick="event.preventDefault();getCoupon()" data-toggle="tooltip" class="btn btn-primary">{{ button_get }}</button>
         {% endif %}
 
         <h3 id="responseMessage"></h3>
@@ -39,12 +39,12 @@
         $.ajax({
             url: 'index.php?route=extension/module/coupon_nik/getCoupon&code={{ coupon_code }}',
             success: function(res) {
-                let text = 'Купон {{ coupon_name }} на скидку {{ coupon_discount }}' + ('{{ coupon_type }}' === 'P' ? '%' : 'руб.') + ' успешно получен. Его код - {{ coupon_code }}. '
+                let text = '{{ text_coupon}} {{ coupon_name }} {{ text_for_discount}} {{ coupon_discount }}' + ('{{ coupon_type }}' === 'P' ? '%' : 'руб.') + ' {{ text_success_received}} {{ coupon_code }}. '
                 $('#get-coupon').hide();
                 $('#responseMessage').text(text)
 
-                $('#responseMessage').append('Не забудьте сохранить его и использовать при покупке! ');
-                $('#responseMessage').append('<a href="/">Перейти на главную страницу</a>');
+                $('#responseMessage').append('{{ text_dont_forget_save_and_use}} ');
+                $('#responseMessage').append('<a href="/">{{ text_go_to_main_page }}</a>');
             }
         });
     }

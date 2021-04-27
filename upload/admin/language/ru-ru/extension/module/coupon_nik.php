@@ -18,6 +18,12 @@ $_['text_uses']           = 'Применений';
 $_['text_link']           = 'Ссылка';
 $_['text_success_sended_coupons']= 'Купоны успешно отправлены!';
 $_['text_success_sended_coupon'] = 'Купон успешно отправлен!';
+$_['text_you_got_new_coupon'] = 'Вы получили новый купон!';
+$_['text_coupon_number']  = 'Купон №';
+$_['text_coupon_for']     = 'Купон для';
+$_['text_mailing_heading_title']  = 'Здравствуйте уважаемый, %s!';
+$_['text_mailing_body']  = 'Вы получили купон %s на скидку. Используйте его в нашем магазине!';
+$_['text_link_to_get_coupon']  = 'Ссылка для получения его в нашем магазине!';
 
 // Entry
 $_['entry_name']          = 'Название Купона';

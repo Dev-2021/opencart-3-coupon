@@ -29,7 +29,7 @@ class ControllerExtensionModuleCouponNik extends Controller {
                 foreach ($coupon_template['coupon_customer'] as $customer_id) {
                     $customer = $this->model_customer_customer->getCustomer($customer_id);
 
-                    $coupon_template['name'] = 'Купон для ' . $customer['lastname'] . ' ' . $customer['firstname'];
+                    $coupon_template['name'] = $this->language->get('text_coupon_for') . ' ' . $customer['lastname'] . ' ' . $customer['firstname'];
                     $coupon_template['code'] = $this->generateCode();
 
                     $coupon_id = $this->model_marketing_coupon->addCoupon($coupon_template);
@@ -47,7 +47,9 @@ class ControllerExtensionModuleCouponNik extends Controller {
                         $send_info = array(
                             'email' => $customer['email'],
                             'name'  => $customer['lastname'] . ' ' . $customer['firstname'],
-                            'code'  => $coupon_template['code']
+                            'code'  => $coupon_template['code'],
+                            'coupon_alert_heading' => sprintf($this->language->get('text_mailing_heading_title'), ($customer['lastname'] . ' ' . $customer['firstname'])),
+                            'coupon_alert_body' => sprintf($this->language->get('text_mailing_body'), $coupon_template['code'])
                         );
                         $this->sendCoupon($send_info);
                         $this->session->data['sended'] = $this->language->get('text_sended');
@@ -56,7 +58,7 @@ class ControllerExtensionModuleCouponNik extends Controller {
 
             } else {
                 $count = '';
-                $names = $this->model_extension_module_coupon_nik->getCouponsByName('Купон №');
+                $names = $this->model_extension_module_coupon_nik->getCouponsByName($this->language->get('text_coupon_number'));
                 $last_name = end($names);
                 if ($last_name) {
                     $part = explode(' ', $last_name['name']);
@@ -64,9 +66,9 @@ class ControllerExtensionModuleCouponNik extends Controller {
                 }
                 for($i = 0; $i < $coupon_template['coupon_count']; $i++) {
                     if(is_int($count)) {
-                        $coupon_template['name'] = 'Купон №' . ($count + $i + 1);
+                        $coupon_template['name'] = $this->language->get('text_coupon_number') . ($count + $i + 1);
                     } else {
-                        $coupon_template['name'] = 'Купон №' . ($i + 1);
+                        $coupon_template['name'] = $this->language->get('text_coupon_number') . ($i + 1);
                     }
                     $coupon_template['code'] = $this->generateCode();
 
@@ -244,9 +246,6 @@ class ControllerExtensionModuleCouponNik extends Controller {
         );
 
         $results = $this->model_extension_module_coupon_nik->getCoupons($filter_data);
-//        echo '<pre>';/*
-//        print_r($results);
-//        echo '</pre>';*/
 
         if(!$filter_code) {
             $coupon_total = $this->model_marketing_coupon->getTotalCoupons();
@@ -531,6 +530,8 @@ class ControllerExtensionModuleCouponNik extends Controller {
                     'email' => $customer['email'],
                     'name'  => $customer['lastname'] . ' ' . $customer['firstname'],
                     'code'  => $coupon['coupon_code'],
+                    'coupon_alert_heading' => sprintf($this->language->get('text_mailing_heading_title'), ($customer['lastname'] . ' ' . $customer['firstname'])),
+                    'coupon_alert_body' => sprintf($this->language->get('text_mailing_body'), $coupon['coupon_code']),
                     'link'  => str_replace('/admin', '', $link)
                 );
                 $this->sendCoupon($send_info);
@@ -575,7 +576,7 @@ class ControllerExtensionModuleCouponNik extends Controller {
         $mail->setTo($data['email']);
         $mail->setFrom($from);
         $mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
-        $mail->setSubject(html_entity_decode(sprintf('Вы получили новый купон!'), ENT_QUOTES, 'UTF-8'));
+        $mail->setSubject(html_entity_decode(sprintf($this->language->get('text_you_got_new_coupon')), ENT_QUOTES, 'UTF-8'));
         $mail->setHtml($this->load->view('mail/coupon_alert', $data));
         $mail->send();
     }

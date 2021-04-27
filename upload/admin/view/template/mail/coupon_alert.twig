@@ -1,6 +1,6 @@
-<h1>Здравствуйте уважаемый, {{ name }}!</h1>
-<p>Вы получили купон {{ code }} на скидку. Используйте его в нашем магазине!</p>
+<h1>{{ coupon_alert_heading }}</h1>
+<p>{{ coupon_alert_body }}</p>
 <br>
 {% if link %}
-  <a href="{{ link }}" target="_blank">Ссылка для получения его в нашем магазине!</a>
+  <a href="{{ link }}" target="_blank">{{ text_link_to_get_coupon }}</a>
 {% endif %}
