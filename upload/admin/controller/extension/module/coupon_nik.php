@@ -551,7 +551,7 @@ class ControllerExtensionModuleCouponNik extends Controller {
                 $customer = $this->model_customer_customer->getCustomer($coupon['customer_id']);
             }
 
-            $link = $this->url->link('extension/module/coupon_nik', '&code=' . $coupon['coupon_code']);
+            $link = $this->url->link('extension/module/coupon_nik', '&code=' . $coupon['code']);
             $send_info = array(
                 'email' => $customer['email'],
                 'name'  => $customer['lastname'] . ' ' . $customer['firstname'],

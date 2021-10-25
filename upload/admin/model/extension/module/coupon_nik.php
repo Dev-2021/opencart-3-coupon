@@ -38,7 +38,7 @@ class ModelExtensionModuleCouponNik extends Model {
     }
 
     public function getCoupon($coupon_id) {
-        $query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "customer_coupon WHERE coupon_id = '" . (int)$coupon_id . "'");
+        $query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "coupon WHERE coupon_id = '" . (int)$coupon_id . "'");
 
         return $query->row;
     }
