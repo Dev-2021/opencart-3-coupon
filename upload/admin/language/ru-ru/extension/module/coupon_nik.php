@@ -24,6 +24,7 @@ $_['text_coupon_for']     = 'Купон для';
 $_['text_mailing_heading_title']  = 'Здравствуйте уважаемый, %s!';
 $_['text_mailing_body']  = 'Вы получили купон %s на скидку. Используйте его в нашем магазине!';
 $_['text_link_to_get_coupon']  = 'Ссылка для получения его в нашем магазине!';
+$_['text_your_coupon_code']  = 'Ваш код купона: ';
 
 // Entry
 $_['entry_name']          = 'Название Купона';

@@ -5,4 +5,8 @@
   <p>
     <a href="{{ link }}" target="_blank">{{ text_link_to_get_coupon }}</a>
   </p>
+{% else %}
+  <p>
+    {{ text_your_coupon_code }}{{ code }}
+  </p>
 {% endif %}

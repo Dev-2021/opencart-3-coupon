@@ -24,7 +24,7 @@ class ControllerExtensionModuleCouponNik extends Controller {
         if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->validateForm()) {
             $coupon_template = $this->request->post;
 
-            if(isset($coupon_template['coupon_customer'])) {
+            if(isset($coupon_template['coupon_customer'])) { // coupons for customers
                 $this->load->model('customer/customer');
                 foreach ($coupon_template['coupon_customer'] as $customer_id) {
                     $customer = $this->model_customer_customer->getCustomer($customer_id);
@@ -33,12 +33,17 @@ class ControllerExtensionModuleCouponNik extends Controller {
                     $coupon_template['code'] = $this->generateCode();
 
                     $coupon_id = $this->model_marketing_coupon->addCoupon($coupon_template);
+                    if ($coupon_template['coupon_receive_method'] == '1') { // method to receive - by link
+                        $coupon_link = $coupon_template['coupon_link'] . '&code=' . $coupon_template['code'];
+                    } else {
+                        $coupon_link = '';
+                    }
                     // save to our db
                     $data = array(
                         'coupon_id'   => $coupon_id,
                         'coupon_code' => $coupon_template['code'],
                         'customer_id' => $customer['customer_id'],
-                        'coupon_link' => $coupon_template['coupon_link'] . '&code=' . $coupon_template['code']
+                        'coupon_link' => $coupon_link
                     );
                     $this->model_extension_module_coupon_nik->add($data);
 
@@ -49,7 +54,8 @@ class ControllerExtensionModuleCouponNik extends Controller {
                             'name'  => $customer['lastname'] . ' ' . $customer['firstname'],
                             'code'  => $coupon_template['code'],
                             'coupon_alert_heading' => sprintf($this->language->get('text_mailing_heading_title'), ($customer['lastname'] . ' ' . $customer['firstname'])),
-                            'coupon_alert_body' => sprintf($this->language->get('text_mailing_body'), $coupon_template['code'])
+                            'coupon_alert_body' => sprintf($this->language->get('text_mailing_body'), $coupon_template['code']),
+                            'link' => $coupon_link
                         );
                         $this->sendCoupon($send_info);
                         $this->session->data['sended'] = $this->language->get('text_sended');
@@ -59,6 +65,7 @@ class ControllerExtensionModuleCouponNik extends Controller {
             } else {
                 $count = '';
                 $names = $this->model_extension_module_coupon_nik->getCouponsByName($this->language->get('text_coupon_number'));
+
                 $last_name = end($names);
                 if ($last_name) {
                     $part = explode(' ', $last_name['name']);
@@ -75,11 +82,17 @@ class ControllerExtensionModuleCouponNik extends Controller {
                     $coupon_id = $this->model_marketing_coupon->addCoupon($coupon_template);
 
                     if(isset($coupon_template['coupon_link'])) {
+                        if ($coupon_template['coupon_receive_method'] == '1') { // method to receive - by link
+                            $coupon_link = $coupon_template['coupon_link'] . '&code=' . $coupon_template['code'];
+                        } else {
+                            $coupon_link = '';
+                        }
+
                         $data = array(
                             'coupon_id'   => $coupon_id,
                             'coupon_code' => $coupon_template['code'],
                             'customer_id' => '',
-                            'coupon_link' => $coupon_template['coupon_link'] . '&code=' . $coupon_template['code']
+                            'coupon_link' => $coupon_link
                         );
                         $this->model_extension_module_coupon_nik->add($data);
                     }
@@ -254,8 +267,14 @@ class ControllerExtensionModuleCouponNik extends Controller {
         }
 
         foreach ($results as $result) {
-            $link = $this->url->link('extension/module/coupon_nik', '&code=' . $result['code'], true);
-            $link = str_replace('/admin', '', $link);
+            $link_path = $this->model_extension_module_coupon_nik->getCouponLink($result['coupon_id']);
+
+            if (!empty($link_path) && isset($link_path['coupon_link']) && !empty($link_path['coupon_link'])) {
+                $link = HTTPS_CATALOG . $link_path['coupon_link'];
+            } else {
+                $link = '';
+            }
+
             $data['coupons'][] = array(
                 'coupon_id'  => $result['coupon_id'],
                 'name'       => $result['name'] . ($result['discount'] != 0 ? ' (<span class="text-success">' . $this->language->get('entry_discount') . ' ' . (int)$result['discount'] . ($result['type'] == 'P' ? '%' : '') . '</span> ' . (!$result['uses_total'] ? ')' : '') : "") . ($result['uses_total'] ?  ($result['discount'] == 0 ? ' (' : '') . '<span class="text-danger">' . $this->language->get('text_uses') . ' ' . $result['uses_total'] . '</span>)' : ""),
@@ -551,18 +570,28 @@ class ControllerExtensionModuleCouponNik extends Controller {
                 $customer = $this->model_customer_customer->getCustomer($coupon['customer_id']);
             }
 
-            $link = $this->url->link('extension/module/coupon_nik', '&code=' . $coupon['code']);
+            $link_path = $this->model_extension_module_coupon_nik->getCouponLink($this->request->get['coupon_id']);
+
+            if (!empty($link_path) && isset($link_path['coupon_link']) && !empty($link_path['coupon_link'])) {
+                $link = HTTPS_CATALOG . $link_path['coupon_link'];
+            } else {
+                $link = '';
+            }
+
+//            $link = $this->url->link('extension/module/coupon_nik', '&code=' . $coupon['code']);
             $send_info = array(
                 'email' => $customer['email'],
                 'name'  => $customer['lastname'] . ' ' . $customer['firstname'],
-                'code'  => $coupon['coupon_code'],
-                'link'  => str_replace('/admin', '', $link)
+                'code'  => $coupon['code'],
+                'link'  => $link
             );
             $this->sendCoupon($send_info);
         }
     }
 
     private function sendCoupon($data) {
+        $this->load->language('extension/module/coupon_nik');
+
         $from = $this->config->get('config_email');
 
         $mail = new Mail($this->config->get('config_mail_engine'));
@@ -577,7 +606,9 @@ class ControllerExtensionModuleCouponNik extends Controller {
         $mail->setFrom($from);
         $mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
         $mail->setSubject(html_entity_decode(sprintf($this->language->get('text_you_got_new_coupon')), ENT_QUOTES, 'UTF-8'));
+
         $mail->setHtml($this->load->view('mail/coupon_alert', $data));
+
         $mail->send();
     }
 

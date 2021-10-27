@@ -104,7 +104,9 @@
                                         <td class="text-left">{{ coupon.date_start }}</td>
                                         <td class="text-left">{{ coupon.date_end }}</td>
                                         <td class="text-left">
-                                          <a href="{{ coupon.coupon_link }}" target="_blank">{{ text_link }}</a>
+                                          {% if coupon.coupon_link != '' %}
+                                            <a href="{{ coupon.coupon_link }}" target="_blank">{{ text_link }}</a>
+                                          {% endif %}
                                         </td>
                                         <td class="text-left">{{ coupon.status }}</td>
                                         <td class="text-right">

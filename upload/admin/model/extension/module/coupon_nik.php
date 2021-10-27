@@ -43,6 +43,12 @@ class ModelExtensionModuleCouponNik extends Model {
         return $query->row;
     }
 
+    public function getCouponLink($coupon_id) {
+        $query = $this->db->query("SELECT `coupon_link` FROM " . DB_PREFIX . "customer_coupon WHERE coupon_id = '" . (int)$coupon_id . "'");
+
+        return $query->row;
+    }
+
     public function getCoupons($data = array()) {
         $sql = "SELECT c.`coupon_id`, c.`name`, c.`code`, c.`type`, c.`discount`, c.`uses_total`, c.`date_start`, c.`date_end`, c.`status`, cc.`customer_id` FROM " . DB_PREFIX . "coupon c LEFT JOIN " . DB_PREFIX ."customer_coupon cc ON c.coupon_id = cc.coupon_id";
 
@@ -90,7 +96,7 @@ class ModelExtensionModuleCouponNik extends Model {
     }
 
     public function getCouponsByName($name) {
-        $query = $this->db->query("SELECT `name` FROM " . DB_PREFIX . "coupon WHERE `name` LIKE '" . $name . "%'");
+        $query = $this->db->query("SELECT `name` FROM " . DB_PREFIX . "coupon WHERE `name` LIKE '" . $name . "%' ORDER BY `name`");
 
         return $query->rows;
     }
