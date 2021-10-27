@@ -544,14 +544,21 @@ class ControllerExtensionModuleCouponNik extends Controller {
             $coupons = $this->model_extension_module_coupon_nik->getCouponsWithCustomer();
             foreach ($coupons as $coupon) {
                 $customer = $results = $this->model_customer_customer->getCustomer($coupon['customer_id']);
-                $link = $this->url->link('extension/module/coupon_nik', '&code=' . $coupon['coupon_code']);
+//                $link = $this->url->link('extension/module/coupon_nik', '&code=' . $coupon['coupon_code']);
+
+                if (isset($coupon['coupon_link']) && !empty($coupon['coupon_link'])) {
+                    $link = HTTPS_CATALOG . $coupon['coupon_link'];
+                } else {
+                    $link = '';
+                }
+
                 $send_info = array(
                     'email' => $customer['email'],
                     'name'  => $customer['lastname'] . ' ' . $customer['firstname'],
                     'code'  => $coupon['coupon_code'],
                     'coupon_alert_heading' => sprintf($this->language->get('text_mailing_heading_title'), ($customer['lastname'] . ' ' . $customer['firstname'])),
                     'coupon_alert_body' => sprintf($this->language->get('text_mailing_body'), $coupon['coupon_code']),
-                    'link'  => str_replace('/admin', '', $link)
+                    'link'  => $link
                 );
                 $this->sendCoupon($send_info);
             }
