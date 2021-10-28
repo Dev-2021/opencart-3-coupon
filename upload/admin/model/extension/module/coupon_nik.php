@@ -101,6 +101,12 @@ class ModelExtensionModuleCouponNik extends Model {
         return $query->rows;
     }
 
+    public function getCouponCustomer($coupon_id) {
+        $query = $this->db->query("SELECT `customer_id` FROM " . DB_PREFIX . "customer_coupon WHERE `coupon_id` = '" . (int)$coupon_id ."'");
+
+        return $query->row;
+    }
+
     public function getCouponsWithCustomer() {
         $query = $this->db->query("SELECT `coupon_code`, `customer_id`, `coupon_link` FROM " . DB_PREFIX . "customer_coupon WHERE `customer_id` <> 0");
 
