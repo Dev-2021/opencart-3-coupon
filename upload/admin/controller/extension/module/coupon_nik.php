@@ -53,8 +53,6 @@ class ControllerExtensionModuleCouponNik extends Controller {
                             'email' => $customer['email'],
                             'name'  => $customer['lastname'] . ' ' . $customer['firstname'],
                             'code'  => $coupon_template['code'],
-                            'coupon_alert_heading' => sprintf($this->language->get('text_mailing_heading_title'), ($customer['lastname'] . ' ' . $customer['firstname'])),
-                            'coupon_alert_body' => sprintf($this->language->get('text_mailing_body'), $coupon_template['code']),
                             'link' => $coupon_link
                         );
                         $this->sendCoupon($send_info);
@@ -329,12 +327,12 @@ class ControllerExtensionModuleCouponNik extends Controller {
             $url .= '&page=' . $this->request->get['page'];
         }
 
-        $data['sort_name'] = $this->url->link('extension/module/coupon_nik', 'user_token=' . $this->session->data['user_token'] . '&sort=name' . $url, true);
-        $data['sort_code'] = $this->url->link('extension/module/coupon_nik', 'user_token=' . $this->session->data['user_token'] . '&sort=code' . $url, true);
-        $data['sort_discount'] = $this->url->link('extension/module/coupon_nik', 'user_token=' . $this->session->data['user_token'] . '&sort=discount' . $url, true);
-        $data['sort_date_start'] = $this->url->link('extension/module/coupon_nik', 'user_token=' . $this->session->data['user_token'] . '&sort=date_start' . $url, true);
-        $data['sort_date_end'] = $this->url->link('extension/module/coupon_nik', 'user_token=' . $this->session->data['user_token'] . '&sort=date_end' . $url, true);
-        $data['sort_status'] = $this->url->link('extension/module/coupon_nik', 'user_token=' . $this->session->data['user_token'] . '&sort=status' . $url, true);
+        $data['sort_name'] = $this->url->link('extension/module/coupon_nik', 'user_token=' . $this->session->data['user_token'] . '&sort=c.name' . $url, true);
+        $data['sort_code'] = $this->url->link('extension/module/coupon_nik', 'user_token=' . $this->session->data['user_token'] . '&sort=c.code' . $url, true);
+        $data['sort_discount'] = $this->url->link('extension/module/coupon_nik', 'user_token=' . $this->session->data['user_token'] . '&sort=c.discount' . $url, true);
+        $data['sort_date_start'] = $this->url->link('extension/module/coupon_nik', 'user_token=' . $this->session->data['user_token'] . '&sort=c.date_start' . $url, true);
+        $data['sort_date_end'] = $this->url->link('extension/module/coupon_nik', 'user_token=' . $this->session->data['user_token'] . '&sort=c.date_end' . $url, true);
+        $data['sort_status'] = $this->url->link('extension/module/coupon_nik', 'user_token=' . $this->session->data['user_token'] . '&sort=c.status' . $url, true);
 
         $url = '';
 
@@ -556,8 +554,6 @@ class ControllerExtensionModuleCouponNik extends Controller {
                     'email' => $customer['email'],
                     'name'  => $customer['lastname'] . ' ' . $customer['firstname'],
                     'code'  => $coupon['coupon_code'],
-                    'coupon_alert_heading' => sprintf($this->language->get('text_mailing_heading_title'), ($customer['lastname'] . ' ' . $customer['firstname'])),
-                    'coupon_alert_body' => sprintf($this->language->get('text_mailing_body'), $coupon['coupon_code']),
                     'link'  => $link
                 );
 
@@ -568,6 +564,7 @@ class ControllerExtensionModuleCouponNik extends Controller {
 
     public function sendCouponToCustomer() {
         if(isset($this->request->get['coupon_id']) && $this->request->server['REQUEST_METHOD'] == 'GET') {
+            $this->load->language('extension/module/coupon_nik');
             $this->load->model('extension/module/coupon_nik');
             $this->load->model('customer/customer');
             $coupon = $this->model_extension_module_coupon_nik->getCoupon($this->request->get['coupon_id']);
@@ -597,12 +594,20 @@ class ControllerExtensionModuleCouponNik extends Controller {
                     'link' => $link
                 );
                 $this->sendCoupon($send_info);
+            } else {
+                $json['error'] = $this->language->get('error_user_not_found');
+
+                $this->response->addHeader('Content-Type: application/json');
+                $this->response->setOutput(json_encode($json));
             }
         }
     }
 
     private function sendCoupon($data) {
         $this->load->language('extension/module/coupon_nik');
+
+        $data['coupon_alert_heading'] = sprintf($this->language->get('text_mailing_heading_title'), $data['name']);
+        $data['coupon_alert_body'] = sprintf($this->language->get('text_mailing_body'), $data['coupon_code']);
 
         $from = $this->config->get('config_email');
 

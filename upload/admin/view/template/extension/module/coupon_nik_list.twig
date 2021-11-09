@@ -205,7 +205,7 @@
     <div class="modal-content">
       <div class="modal-header"></div>
       <div class="modal-body">
-        <p>{{ text_success_sended_coupon }}</p>
+        <p id="sendedCouponModalResultText"></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ button_close }}</button>
@@ -265,7 +265,14 @@
                 $('#sendCouponToCustomerModalWithEmail').modal('hide')
                 $('#input-send-coupon-customer-with-email').val('')
             },
-            success: function () {
+            success: function (res) {
+
+                if (res['error']) {
+                    $('#sendedCouponModalResultText').text(res['error'])
+                } else {
+                    $('#sendedCouponModalResultText').text('{{ text_success_sended_coupon }}')
+                }
+
                 $('#sendedCouponModal').modal('show')
             }
         })
@@ -307,7 +314,7 @@
     $('input[name=\'customer_email_send_coupon\']').autocomplete({
         'source': function(request, response) {
             $.ajax({
-                url: 'index.php?route=customer/customer/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+                url: 'index.php?route=customer/customer/autocomplete&user_token={{ user_token }}&filter_email=' +  encodeURIComponent(request),
                 dataType: 'json',
                 success: function(json) {
                     response($.map(json, function(item) {
